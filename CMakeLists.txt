@@ -10,4 +10,4 @@ project ("Wifinfo")
 
 add_subdirectory ("Wifinfo")
 
-target_link_libraries(Wifinfo PRIVATE wlanapi)
+target_link_libraries(Wifinfo PRIVATE wlanapi d3d11)

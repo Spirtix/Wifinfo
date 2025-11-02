@@ -2,6 +2,7 @@
 
 #include "Application.h"
 #include "Platform/Window.h"
+#include "Platform/Renderer.h"
 #include "Wifi/WifiScanner.h"
 
 void Application::Run() {
@@ -11,7 +12,9 @@ void Application::Run() {
 		std::cout << ap.ssid << " " << ap.band << " " << ap.channel << " " << ap.signalQuality << " " << ap.frequency << " " << std::endl;
 	}
 	Window window;
+	Renderer renderer(window.GetNativeHandle());
 	while (!window.ShouldClose()) {
-		Sleep(10);
+		renderer.BeginFrame();
+		renderer.EndFrame();
 	}
 }

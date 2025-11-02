@@ -6,6 +6,7 @@ public:
 	Window();
 	~Window();
 	bool ShouldClose();
+	HWND GetNativeHandle();
 private:
 	HWND hwnd;
 	WNDCLASSW wc = { };

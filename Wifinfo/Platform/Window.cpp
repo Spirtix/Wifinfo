@@ -26,6 +26,10 @@ bool Window::ShouldClose() {
     return false;
 }
 
+HWND Window::GetNativeHandle() {
+    return hwnd;
+}
+
 LRESULT WINAPI Window::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     switch (msg) {
