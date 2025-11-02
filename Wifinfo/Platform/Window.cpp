@@ -11,7 +11,7 @@ Window::Window() {
 }
 
 Window::~Window() {
-
+    DestroyWindow(hwnd);
 }
 
 bool Window::ShouldClose() {
