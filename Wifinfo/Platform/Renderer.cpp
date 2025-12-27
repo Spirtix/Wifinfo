@@ -1,3 +1,6 @@
+#include <backends/imgui_impl_dx11.h>
+#include <backends/imgui_impl_win32.h>
+
 #include "Renderer.h"
 
 Renderer::Renderer(HWND windowHandle) {
@@ -24,10 +27,18 @@ Renderer::Renderer(HWND windowHandle) {
         res = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_WARP, nullptr, createDeviceFlags, featureLevelArray, 2, D3D11_SDK_VERSION, &sd, &swapChain, &device, &featureLevel, &deviceContext);
 
     CreateRenderTarget();
+
+    ImGui::CreateContext();
+    ImGui_ImplWin32_Init(windowHandle);
+    ImGui_ImplDX11_Init(device, deviceContext);
 }
 
 Renderer::~Renderer() {
+    ImGui_ImplDX11_Shutdown();
+    ImGui_ImplWin32_Shutdown();
+    ImGui::DestroyContext();
     ReleaseRenderTarget();
+
     if (swapChain)
         swapChain->Release();
     if (deviceContext)
@@ -37,11 +48,16 @@ Renderer::~Renderer() {
 }
 
 void Renderer::BeginFrame() {
-    deviceContext->OMSetRenderTargets(1, &renderTargetView, nullptr);
-    deviceContext->ClearRenderTargetView(renderTargetView, Renderer::clearColor);
+    ImGui_ImplDX11_NewFrame();
+    ImGui_ImplWin32_NewFrame();
+    ImGui::NewFrame();
 }
 
 void Renderer::EndFrame() {
+    ImGui::Render();
+    deviceContext->OMSetRenderTargets(1, &renderTargetView, nullptr);
+    deviceContext->ClearRenderTargetView(renderTargetView, Renderer::clearColor);
+    ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
     swapChain->Present(1, 0);
 }
 

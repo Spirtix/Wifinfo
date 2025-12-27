@@ -7,7 +7,8 @@ if (POLICY CMP0141)
 endif()
 
 project ("Wifinfo")
-
+include_directories(${CMAKE_SOURCE_DIR}/vendor/imgui)
 add_subdirectory ("Wifinfo")
+add_subdirectory("vendor")
 
-target_link_libraries(Wifinfo PRIVATE wlanapi d3d11)
+target_link_libraries(Wifinfo PRIVATE wlanapi d3d11 imgui)

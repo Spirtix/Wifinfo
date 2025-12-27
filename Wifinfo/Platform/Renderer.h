@@ -17,4 +17,5 @@ private:
 
 	void CreateRenderTarget();
 	void ReleaseRenderTarget();
+
 };
