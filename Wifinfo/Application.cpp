@@ -4,6 +4,7 @@
 #include "Platform/Window.h"
 #include "Platform/Renderer.h"
 #include "Wifi/WifiScanner.h"
+#include "Window/TableWindow.h"
 
 void Application::Run() {
 	WifiScanner wifiScanner;
@@ -14,8 +15,12 @@ void Application::Run() {
 	
 	Window window;
 	Renderer renderer(window.GetNativeHandle());
+	Application::AppContext.PushWindow(std::make_unique<TableWindow>());
 	while (!window.ShouldClose()) {
 		renderer.BeginFrame();
+		for (auto& wnd : Application::AppContext.windows) {
+			wnd->Update();
+		}
 		renderer.EndFrame();
 	}
 }
