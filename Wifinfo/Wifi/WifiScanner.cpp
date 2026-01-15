@@ -65,6 +65,9 @@ std::vector<WifiAccessPoint> WifiScanner::ScanNetworks() {
 		throw;
 	}
 
+	if (interfaceList != NULL)
+		WlanFreeMemory(interfaceList);
+
 	return accessPoints;
 }
 
