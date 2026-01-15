@@ -1,5 +1,6 @@
 #include <backends/imgui_impl_dx11.h>
 #include <backends/imgui_impl_win32.h>
+#include <implot.h>
 
 #include "Renderer.h"
 
@@ -29,6 +30,7 @@ Renderer::Renderer(HWND windowHandle) {
     CreateRenderTarget();
 
     ImGui::CreateContext();
+    ImPlot::CreateContext();
     ImGui_ImplWin32_Init(windowHandle);
     ImGui_ImplDX11_Init(device, deviceContext);
 }
@@ -36,6 +38,7 @@ Renderer::Renderer(HWND windowHandle) {
 Renderer::~Renderer() {
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
+    ImPlot::DestroyContext();
     ImGui::DestroyContext();
     ReleaseRenderTarget();
 

@@ -44,6 +44,7 @@ std::vector<WifiAccessPoint> WifiScanner::ScanNetworks() {
 					WifiAccessPoint ap;
 					ap.ssid = GetSSIDString(bss.dot11Ssid);
 					ap.signalQuality = (int)bss.uLinkQuality;
+					ap.signalStrength = bss.lRssi;
 					ap.channel = FrequencyToChannel(bss.ulChCenterFrequency);
 					ap.frequency = bss.ulChCenterFrequency;
 					ap.band = (bss.ulChCenterFrequency > 5000000) ? "5GHz" : "2.4GHz";

@@ -8,6 +8,7 @@ endif()
 
 project ("Wifinfo")
 include_directories(${CMAKE_SOURCE_DIR}/vendor/imgui)
+include_directories(${CMAKE_SOURCE_DIR}/vendor/implot)
 add_subdirectory ("Wifinfo")
 add_subdirectory("vendor")
 
