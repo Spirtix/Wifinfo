@@ -11,7 +11,7 @@ void Application::Run() {
 	WifiScanner wifiScanner;
 	Application::AppContext.wifiAPs = wifiScanner.ScanNetworks();
 	for (const auto& ap : Application::AppContext.wifiAPs) {
-		std::cout << ap.ssid << " " << ap.band << " " << ap.channel << " " << ap.signalQuality << " " << ap.frequency << " " << std::endl;
+		std::cout << ap.ssid << " " << ap.band << " primary:" << ap.primaryChannel << " center:" << ap.centerChannel << ap.signalQuality << " " << ap.frequency << " " << ap.widthMHz << std::endl;
 	}
 	
 	Window window;

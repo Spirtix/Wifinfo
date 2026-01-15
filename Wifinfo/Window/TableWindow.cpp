@@ -25,7 +25,7 @@ void TableWindow::Update() {
             ImGui::Text("%s", ap.ssid.c_str());
 
             ImGui::TableSetColumnIndex(1);
-            ImGui::Text("%lu", ap.channel);
+            ImGui::Text("%lu", ap.primaryChannel);
 
             ImGui::TableSetColumnIndex(2);
             ImGui::Text("%d", ap.signalQuality);

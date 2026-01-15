@@ -18,4 +18,5 @@ private:
 
     std::string GetSSIDString(const DOT11_SSID& ssid);
     ULONG FrequencyToChannel(ULONG frequency);
+    WifiAccessPoint GetChannelInfo(const WLAN_BSS_ENTRY& bss);
 };

@@ -41,13 +41,11 @@ std::vector<WifiAccessPoint> WifiScanner::ScanNetworks() {
 				for (DWORD j = 0; j < bssList->dwNumberOfItems; ++j) {
 					WLAN_BSS_ENTRY& bss = bssList->wlanBssEntries[j];
 
-					WifiAccessPoint ap;
+					WifiAccessPoint ap = GetChannelInfo(bss);
 					ap.ssid = GetSSIDString(bss.dot11Ssid);
 					ap.signalQuality = (int)bss.uLinkQuality;
 					ap.signalStrength = bss.lRssi;
-					ap.channel = FrequencyToChannel(bss.ulChCenterFrequency);
-					ap.frequency = bss.ulChCenterFrequency;
-					ap.band = (bss.ulChCenterFrequency > 5000000) ? "5GHz" : "2.4GHz";
+					ap.band = (ap.frequency > 5000000) ? "5GHz" : "2.4GHz";
 
 					accessPoints.push_back(ap);
 				}
@@ -77,6 +75,48 @@ std::string WifiScanner::GetSSIDString(const DOT11_SSID& ssid) {
 		return "";
 
 	return std::string(reinterpret_cast<const char*>(ssid.ucSSID), ssid.uSSIDLength);
+}
+
+WifiAccessPoint WifiScanner::GetChannelInfo(const WLAN_BSS_ENTRY& bss) {
+	WifiAccessPoint ap;
+	ap.frequency = bss.ulChCenterFrequency;
+	ap.primaryChannel = FrequencyToChannel(ap.frequency);
+	ap.centerChannel = ap.primaryChannel;
+	ap.widthMHz = 20;
+
+	unsigned char* pIeData = (unsigned char*)&bss + bss.ulIeOffset;
+	ULONG offset = 0;
+
+	while (offset + 2 < bss.ulIeSize) {
+		unsigned char id = pIeData[offset];
+		unsigned char length = pIeData[offset + 1];
+		unsigned char* data = &pIeData[offset + 2];
+
+		if (id == 61 && length >= 2) {
+			ap.primaryChannel = data[0];
+			unsigned char secondaryOffset = data[1] & 0x03;
+
+			if (secondaryOffset == 1) { // SCA: Secondary Channel Above
+				ap.widthMHz = 40;
+				ap.centerChannel = ap.primaryChannel + 2;
+			} else if (secondaryOffset == 3) { // SCB: Secondary Channel Below
+				ap.widthMHz = 40;
+				ap.centerChannel = ap.primaryChannel - 2;
+			}
+		} else if (id == 192 && length >= 3) {
+			unsigned char widthMode = data[0]; // 0: 20/40, 1: 80, 2: 160
+			if (widthMode == 1) {
+				ap.widthMHz = 80;
+				ap.centerChannel = data[1];
+			} else if (widthMode == 2) {
+				ap.widthMHz = 160;
+				ap.centerChannel = data[1];
+			}
+		}
+
+		offset += (2 + length);
+	}
+	return ap;
 }
 
 ULONG WifiScanner::FrequencyToChannel(ULONG frequency) {

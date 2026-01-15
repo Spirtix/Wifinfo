@@ -19,8 +19,8 @@ void ChannelPlotWindow::Update() {
 
 	for (const auto& ap : Application::AppContext.wifiAPs) {
 		const double channelWidth = 2.0;
-		const double minChannel = ap.channel - channelWidth;
-		const double maxChannel = ap.channel + channelWidth;
+		const double minChannel = ap.primaryChannel - channelWidth;
+		const double maxChannel = ap.primaryChannel + channelWidth;
 
 		for (int i = 0; i < numPoints; i++) {
 			double x = minChannel + (maxChannel - minChannel) * i / (numPoints - 1);

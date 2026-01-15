@@ -6,7 +6,9 @@ struct WifiAccessPoint {
 	std::string ssid;
 	int signalQuality;
 	long signalStrength;
-	unsigned long channel;
+	int primaryChannel;
+	int centerChannel;
 	unsigned long frequency;
+	int widthMHz;
 	std::string band;
 };
