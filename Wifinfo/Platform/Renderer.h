@@ -7,6 +7,7 @@ public:
 	~Renderer();
 	void BeginFrame();
 	void EndFrame();
+	void OnResize(int width, int height);
 
 private:
 	ID3D11Device* device;

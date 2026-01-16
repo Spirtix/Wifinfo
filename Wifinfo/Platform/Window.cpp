@@ -1,5 +1,5 @@
 #include <imgui.h>
-
+#include<iostream>
 #include "Window.h"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -11,6 +11,7 @@ Window::Window() {
 	RegisterClassW(&wc);
 
 	hwnd = CreateWindowExW(0, wc.lpszClassName, L"Wifinfo", WS_OVERLAPPEDWINDOW, NULL, NULL, 1280, 720, NULL, NULL, wc.hInstance, NULL);
+    SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)this);
 	ShowWindow(hwnd, SW_SHOWDEFAULT);
 }
 
@@ -34,12 +35,21 @@ HWND Window::GetNativeHandle() {
     return hwnd;
 }
 
+void Window::SetResizeCallback(std::function<void(int, int)> callback) {
+    resizeCallback = callback;
+}
+
 LRESULT WINAPI Window::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+    Window* window = (Window*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
     if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
         return true;
 
     switch (msg) {
+        case WM_SIZE:
+            if (window && window->resizeCallback && wParam != SIZE_MINIMIZED)
+                window->resizeCallback(LOWORD(lParam), HIWORD(lParam));
+            return 0;
         case WM_DESTROY:
 		    PostQuitMessage(0);
             return 0;

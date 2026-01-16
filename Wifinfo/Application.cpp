@@ -16,6 +16,9 @@ void Application::Run() {
 	
 	Window window;
 	Renderer renderer(window.GetNativeHandle());
+	window.SetResizeCallback([&renderer](int width, int height) {
+		renderer.OnResize(width, height);
+	});
 	Application::AppContext.PushWindow(std::make_unique<TableWindow>());
 	Application::AppContext.PushWindow(std::make_unique<ChannelPlotWindow>());
 	while (!window.ShouldClose()) {

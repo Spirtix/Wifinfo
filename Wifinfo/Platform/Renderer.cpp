@@ -51,7 +51,7 @@ Renderer::~Renderer() {
 }
 
 void Renderer::BeginFrame() {
-    ImGui_ImplDX11_NewFrame();
+    ImGui_ImplDX11_NewFrame(); // no need to call RSSetViewport because ImGUI does it
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
 }
@@ -62,6 +62,15 @@ void Renderer::EndFrame() {
     deviceContext->ClearRenderTargetView(renderTargetView, Renderer::clearColor);
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
     swapChain->Present(1, 0);
+}
+
+void Renderer::OnResize(int width, int height) {
+    if (!device)
+        return;
+    
+    ReleaseRenderTarget();
+    swapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
+    CreateRenderTarget();
 }
 
 void Renderer::CreateRenderTarget() {
@@ -79,5 +88,4 @@ void Renderer::ReleaseRenderTarget() {
         renderTargetView->Release();
         renderTargetView = nullptr;
     }
-
 }
