@@ -1,8 +1,13 @@
 #include <backends/imgui_impl_dx11.h>
 #include <backends/imgui_impl_win32.h>
 #include <implot.h>
+#include <stdexcept>
+#include <string>
+#include <comdef.h>
 
 #include "Renderer.h"
+
+using Microsoft::WRL::ComPtr;
 
 Renderer::Renderer(HWND windowHandle) {
 	DXGI_SWAP_CHAIN_DESC sd = {};
@@ -23,16 +28,18 @@ Renderer::Renderer(HWND windowHandle) {
     UINT createDeviceFlags = 0;
     D3D_FEATURE_LEVEL featureLevel;
     const D3D_FEATURE_LEVEL featureLevelArray[2] = { D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_0, };
-    HRESULT res = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, createDeviceFlags, featureLevelArray, 2, D3D11_SDK_VERSION, &sd, &swapChain, &device, &featureLevel, &deviceContext);
+    HRESULT res = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, createDeviceFlags, featureLevelArray, 2, D3D11_SDK_VERSION, &sd, swapChain.GetAddressOf(), device.GetAddressOf(), &featureLevel, deviceContext.GetAddressOf());
     if (res == DXGI_ERROR_UNSUPPORTED)
-        res = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_WARP, nullptr, createDeviceFlags, featureLevelArray, 2, D3D11_SDK_VERSION, &sd, &swapChain, &device, &featureLevel, &deviceContext);
+        res = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_WARP, nullptr, createDeviceFlags, featureLevelArray, 2, D3D11_SDK_VERSION, &sd, swapChain.GetAddressOf(), device.GetAddressOf(), &featureLevel, deviceContext.GetAddressOf());
+    
+    ThrowIfFailed(res, "DirecX initialization failed: ");
 
     CreateRenderTarget();
 
     ImGui::CreateContext();
     ImPlot::CreateContext();
     ImGui_ImplWin32_Init(windowHandle);
-    ImGui_ImplDX11_Init(device, deviceContext);
+    ImGui_ImplDX11_Init(device.Get(), deviceContext.Get());
 }
 
 Renderer::~Renderer() {
@@ -41,13 +48,6 @@ Renderer::~Renderer() {
     ImPlot::DestroyContext();
     ImGui::DestroyContext();
     ReleaseRenderTarget();
-
-    if (swapChain)
-        swapChain->Release();
-    if (deviceContext)
-        deviceContext->Release();
-    if (device)
-        device->Release();
 }
 
 void Renderer::BeginFrame() {
@@ -58,8 +58,8 @@ void Renderer::BeginFrame() {
 
 void Renderer::EndFrame() {
     ImGui::Render();
-    deviceContext->OMSetRenderTargets(1, &renderTargetView, nullptr);
-    deviceContext->ClearRenderTargetView(renderTargetView, Renderer::clearColor);
+    deviceContext->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), nullptr);
+    deviceContext->ClearRenderTargetView(renderTargetView.Get(), Renderer::clearColor);
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
     swapChain->Present(1, 0);
 }
@@ -74,18 +74,20 @@ void Renderer::OnResize(int width, int height) {
 }
 
 void Renderer::CreateRenderTarget() {
-    ID3D11Texture2D* backBuffer = nullptr;
-    swapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer));
-    if (!backBuffer)
-        return;
-    device->CreateRenderTargetView(backBuffer, nullptr, &renderTargetView);
-
-    backBuffer->Release();
+    ComPtr<ID3D11Texture2D> backBuffer;
+    HRESULT hr = swapChain->GetBuffer(0, IID_PPV_ARGS(backBuffer.GetAddressOf()));
+    ThrowIfFailed(hr, "DirectX failed to get BackBuffer: ");
+    hr = device->CreateRenderTargetView(backBuffer.Get(), nullptr, renderTargetView.ReleaseAndGetAddressOf());
+    ThrowIfFailed(hr, "DirectX failed to create RTV: ");
 }
 
 void Renderer::ReleaseRenderTarget() {
-    if (renderTargetView) {
-        renderTargetView->Release();
-        renderTargetView = nullptr;
+    renderTargetView.Reset();
+}
+
+inline void Renderer::ThrowIfFailed(HRESULT hr, const std::string& message) {
+    if (FAILED(hr)) {
+        _com_error err(hr);
+        throw std::runtime_error(message + " (" + std::to_string(hr) + ") " + err.ErrorMessage());
     }
 }

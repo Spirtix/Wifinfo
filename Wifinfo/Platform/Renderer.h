@@ -1,5 +1,6 @@
 #pragma once
 #include <d3d11.h>
+#include <wrl/client.h>
 
 class Renderer {
 public:
@@ -10,13 +11,13 @@ public:
 	void OnResize(int width, int height);
 
 private:
-	ID3D11Device* device;
-	ID3D11DeviceContext* deviceContext;
-	IDXGISwapChain* swapChain;
-	ID3D11RenderTargetView* renderTargetView;
+	Microsoft::WRL::ComPtr<ID3D11Device> device;
+	Microsoft::WRL::ComPtr<ID3D11DeviceContext> deviceContext;
+	Microsoft::WRL::ComPtr<IDXGISwapChain> swapChain;
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> renderTargetView;
 	const float clearColor[4] = { 0, 0, 0, 1 };
 
 	void CreateRenderTarget();
 	void ReleaseRenderTarget();
-
+	inline void ThrowIfFailed(HRESULT hr, const std::string& message);
 };
