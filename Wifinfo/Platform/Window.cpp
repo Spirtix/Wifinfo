@@ -17,6 +17,7 @@ Window::Window() {
 
 Window::~Window() {
     DestroyWindow(hwnd);
+    UnregisterClassW(wc.lpszClassName, wc.hInstance);
 }
 
 bool Window::ShouldClose() {
