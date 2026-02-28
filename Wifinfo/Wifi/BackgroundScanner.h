@@ -21,7 +21,7 @@ class BackgroundScanner {
 		std::mutex resultsMtx;
 		std::mutex intervalMtx;
 		std::condition_variable intervalCv;
-		std::chrono::seconds interval{1};
+		std::chrono::seconds interval{5};
 		bool hasScanResults = false;
 		void ThreadWorker();
 };
