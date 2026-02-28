@@ -18,7 +18,7 @@ void TableWindow::Update() {
         ImGui::TableSetupColumn("Band", ImGuiTableColumnFlags_WidthFixed, 20.0f);
         ImGui::TableHeadersRow();
 
-        for (const auto& ap : Application::AppContext.wifiAPs) {
+        for (const auto& ap : appContext.wifiAPs) {
             ImGui::TableNextRow();
 
             ImGui::TableSetColumnIndex(0);

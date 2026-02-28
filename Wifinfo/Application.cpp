@@ -17,13 +17,13 @@ void Application::Run() {
 	window.SetResizeCallback([&renderer](int width, int height) {
 		renderer.OnResize(width, height);
 	});
-	Application::AppContext.PushWindow(std::make_unique<TableWindow>());
-	Application::AppContext.PushWindow(std::make_unique<ChannelPlotWindow>());
+	appContext.PushWindow(std::make_unique<TableWindow>(appContext));
+	appContext.PushWindow(std::make_unique<ChannelPlotWindow>(appContext));
 	while (!window.ShouldClose()) {
 		if (auto scanResult = scanner.TakeResults())
-			Application::AppContext.wifiAPs = std::move(*scanResult);
+			appContext.wifiAPs = std::move(*scanResult);
 		renderer.BeginFrame();
-		for (auto& wnd : Application::AppContext.windows) {
+		for (auto& wnd : appContext.windows) {
 			wnd->Update();
 		}
 		renderer.EndFrame();

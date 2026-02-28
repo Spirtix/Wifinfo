@@ -17,7 +17,7 @@ void ChannelPlotWindow::Update() {
 			ImPlot::SetupAxisLimitsConstraints(ImAxis_X1, -2, 170);
 			ImPlot::SetupAxisZoomConstraints(ImAxis_X1, 0, 15);
 
-			for (const auto& ap : Application::AppContext.wifiAPs) {
+			for (const auto& ap : appContext.wifiAPs) {
 				const double halfWidth = ap.widthMHz / 10.0; // width / 5 MHz / 2.0
 				const double minChannel = ap.centerChannel - halfWidth;
 				const double maxChannel = ap.centerChannel + halfWidth;
