@@ -7,9 +7,18 @@ WifiScanner::WifiScanner() : clientHandle(NULL), negotiatedVersion(0) {
 
 	if (result != ERROR_SUCCESS)
 		throw std::runtime_error("Failed to open WLAN handle.");
+
+	result = WlanEnumInterfaces(clientHandle, NULL, &interfaceList);
+
+	if (result != ERROR_SUCCESS) {
+		WlanCloseHandle(clientHandle, NULL);
+		throw std::runtime_error("Failed to enumerate interfaces. Error code: " + std::to_string(result));
+	}
 }
 
 WifiScanner::~WifiScanner() {
+	if (interfaceList != NULL)
+		WlanFreeMemory(interfaceList);
 	if (clientHandle != NULL)
 		WlanCloseHandle(clientHandle, NULL);
 }
@@ -17,59 +26,66 @@ WifiScanner::~WifiScanner() {
 std::vector<WifiAccessPoint> WifiScanner::ScanNetworks() {
 	std::vector<WifiAccessPoint> accessPoints;
 
-	PWLAN_INTERFACE_INFO_LIST interfaceList = NULL;
-	DWORD result = WlanEnumInterfaces(clientHandle, NULL, &interfaceList);
+	ctx.pendingScans = interfaceList->dwNumberOfItems;
 
+	DWORD result = WlanRegisterNotification(clientHandle, WLAN_NOTIFICATION_SOURCE_ACM,
+		TRUE, WlanNotificationCallback, &ctx, NULL, NULL);
 	if (result != ERROR_SUCCESS)
-		throw std::runtime_error("Failed to enumerate interfaces. Error code: " + std::to_string(result));
+		throw std::runtime_error("Failed to register WLAN notification.");
 
-	try {
-		for (DWORD i = 0; i < interfaceList->dwNumberOfItems; ++i) {
-			WLAN_INTERFACE_INFO& interfaceInfo = interfaceList->InterfaceInfo[i];
+	for (DWORD i = 0; i < interfaceList->dwNumberOfItems; ++i)
+		if (WlanScan(clientHandle, &interfaceList->InterfaceInfo[i].InterfaceGuid, NULL, NULL, NULL) != ERROR_SUCCESS)
+			--ctx.pendingScans;
 
-			result = WlanScan(clientHandle, &interfaceInfo.InterfaceGuid, NULL, NULL, NULL);
-
-			Sleep(1000); //FIXME: wlanscan requests a scan and doesn't block, implement async scanning instead of busy waiting
-
-			PWLAN_BSS_LIST bssList = NULL;
-			result = WlanGetNetworkBssList(clientHandle, &interfaceInfo.InterfaceGuid, NULL, dot11_BSS_type_any, FALSE, NULL, &bssList);
-
-			if (result != ERROR_SUCCESS)
-				continue;
-
-			try {
-				for (DWORD j = 0; j < bssList->dwNumberOfItems; ++j) {
-					WLAN_BSS_ENTRY& bss = bssList->wlanBssEntries[j];
-
-					WifiAccessPoint ap = GetChannelInfo(bss);
-					ap.ssid = GetSSIDString(bss.dot11Ssid);
-					if (ap.ssid.empty())
-						ap.ssid = "<Hidden SSID>";
-					ap.signalQuality = (int)bss.uLinkQuality;
-					ap.signalStrength = bss.lRssi;
-					ap.band = (ap.frequency > 5000000) ? "5GHz" : "2.4GHz";
-
-					accessPoints.push_back(ap);
-				}
-			} catch (...) {
-				if (bssList != NULL)
-					WlanFreeMemory(bssList);
-				throw;
-			}
-
-			if (bssList != NULL)
-				WlanFreeMemory(bssList);
-		}
-	} catch (...) {
-		if (interfaceList != NULL)
-			WlanFreeMemory(interfaceList);
-		throw;
+	{
+		std::unique_lock<std::mutex> lock(ctx.mtx);
+		ctx.cv.wait_for(lock, std::chrono::seconds(5), [this] { return ctx.pendingScans == 0; });
 	}
 
-	if (interfaceList != NULL)
-		WlanFreeMemory(interfaceList);
+	WlanRegisterNotification(clientHandle, WLAN_NOTIFICATION_SOURCE_NONE, TRUE,NULL, NULL, NULL, NULL);
 
+	for (DWORD i = 0; i < interfaceList->dwNumberOfItems; ++i) {
+		PWLAN_BSS_LIST bssList = NULL;
+
+		DWORD result = WlanGetNetworkBssList(clientHandle, &interfaceList->InterfaceInfo[i].InterfaceGuid,
+			NULL, dot11_BSS_type_any, FALSE, NULL, &bssList);
+		if (result != ERROR_SUCCESS)
+			continue;
+
+		try {
+			for (DWORD j = 0; j < bssList->dwNumberOfItems; ++j) {
+				WLAN_BSS_ENTRY& bss = bssList->wlanBssEntries[j];
+
+				WifiAccessPoint ap = GetChannelInfo(bss);
+				ap.ssid = GetSSIDString(bss.dot11Ssid);
+				if (ap.ssid.empty())
+					ap.ssid = "<Hidden SSID>";
+				ap.signalQuality = (int)bss.uLinkQuality;
+				ap.signalStrength = bss.lRssi;
+				ap.band = (ap.frequency > 5000000) ? "5GHz" : "2.4GHz";
+
+				accessPoints.push_back(ap);
+			}
+		} catch (...) {
+			WlanFreeMemory(bssList);
+			throw;
+		}
+
+		if (bssList != NULL)
+			WlanFreeMemory(bssList);
+	}
 	return accessPoints;
+}
+
+void WifiScanner::WlanNotificationCallback(PWLAN_NOTIFICATION_DATA data, PVOID context) {
+	if (!context || data->NotificationSource != WLAN_NOTIFICATION_SOURCE_ACM) return;
+	ScanContext* ctx = reinterpret_cast<ScanContext*>(context);
+
+	if (data->NotificationCode == wlan_notification_acm_scan_complete ||
+		data->NotificationCode == wlan_notification_acm_scan_fail) {
+		--ctx->pendingScans;
+		ctx->cv.notify_all();
+	}
 }
 
 std::string WifiScanner::GetSSIDString(const DOT11_SSID& ssid) {
@@ -135,4 +151,3 @@ ULONG WifiScanner::FrequencyToChannel(ULONG frequency) {
 
 	return 0;
 }
-

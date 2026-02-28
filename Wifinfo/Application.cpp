@@ -3,16 +3,14 @@
 #include "Application.h"
 #include "Platform/Window.h"
 #include "Platform/Renderer.h"
+#include "Wifi/BackgroundScanner.h"
 #include "Wifi/WifiScanner.h"
 #include "Window/TableWindow.h"
 #include "Window/ChannelPlotWindow.h"
 
 void Application::Run() {
-	WifiScanner wifiScanner;
-	Application::AppContext.wifiAPs = wifiScanner.ScanNetworks();
-	for (const auto& ap : Application::AppContext.wifiAPs) {
-		std::cout << ap.ssid << " " << ap.band << " primary:" << ap.primaryChannel << " center:" << ap.centerChannel << ap.signalQuality << " " << ap.frequency << " " << ap.widthMHz << std::endl;
-	}
+	BackgroundScanner scanner(std::make_unique<WifiScanner>());
+	scanner.Start();
 	
 	Window window;
 	Renderer renderer(window.GetNativeHandle());
@@ -22,10 +20,14 @@ void Application::Run() {
 	Application::AppContext.PushWindow(std::make_unique<TableWindow>());
 	Application::AppContext.PushWindow(std::make_unique<ChannelPlotWindow>());
 	while (!window.ShouldClose()) {
+		if (auto scanResult = scanner.TakeResults())
+			Application::AppContext.wifiAPs = std::move(*scanResult);
 		renderer.BeginFrame();
 		for (auto& wnd : Application::AppContext.windows) {
 			wnd->Update();
 		}
 		renderer.EndFrame();
 	}
+
+	scanner.Stop();
 }
