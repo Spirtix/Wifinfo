@@ -17,11 +17,10 @@ class BackgroundScanner {
 		std::vector<WifiAccessPoint> scanResults;
 		std::thread scanThread;
 		std::atomic<bool> running = false;
-		std::atomic<bool> hasResults = false;
 		std::mutex resultsMtx;
 		std::mutex intervalMtx;
 		std::condition_variable intervalCv;
 		std::chrono::seconds interval{5};
-		bool hasScanResults = false;
+		bool hasResults = false;
 		void ThreadWorker();
 };
