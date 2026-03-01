@@ -5,12 +5,12 @@
 #include "Platform/Window.h"
 #include "Platform/Renderer.h"
 #include "Wifi/BackgroundScanner.h"
-#include "Wifi/WifiScanner.h"
+#include "Wifi/WindowsWifiScanner.h"
 #include "Window/TableWindow.h"
 #include "Window/ChannelPlotWindow.h"
 
 void Application::Run() {
-	BackgroundScanner scanner(std::make_unique<WifiScanner>());
+	BackgroundScanner scanner(std::make_unique<WindowsWifiScanner>());
 	scanner.Start();
 	
 	Window window;

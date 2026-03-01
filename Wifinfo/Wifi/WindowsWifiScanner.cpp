@@ -1,8 +1,8 @@
 #include <stdexcept>
 
-#include "WifiScanner.h"
+#include "WindowsWifiScanner.h"
 
-WifiScanner::WifiScanner() : clientHandle(NULL), negotiatedVersion(0) {
+WindowsWifiScanner::WindowsWifiScanner() : clientHandle(NULL), negotiatedVersion(0) {
 	DWORD result = WlanOpenHandle(2, NULL, &negotiatedVersion, &clientHandle);
 
 	if (result != ERROR_SUCCESS)
@@ -16,14 +16,14 @@ WifiScanner::WifiScanner() : clientHandle(NULL), negotiatedVersion(0) {
 	}
 }
 
-WifiScanner::~WifiScanner() {
+WindowsWifiScanner::~WindowsWifiScanner() {
 	if (interfaceList != NULL)
 		WlanFreeMemory(interfaceList);
 	if (clientHandle != NULL)
 		WlanCloseHandle(clientHandle, NULL);
 }
 
-std::vector<WifiAccessPoint> WifiScanner::ScanNetworks() {
+std::vector<WifiAccessPoint> WindowsWifiScanner::ScanNetworks() {
 	std::vector<WifiAccessPoint> accessPoints;
 
 	ctx.pendingScans = interfaceList->dwNumberOfItems;
@@ -77,7 +77,7 @@ std::vector<WifiAccessPoint> WifiScanner::ScanNetworks() {
 	return accessPoints;
 }
 
-void WifiScanner::WlanNotificationCallback(PWLAN_NOTIFICATION_DATA data, PVOID context) {
+void WindowsWifiScanner::WlanNotificationCallback(PWLAN_NOTIFICATION_DATA data, PVOID context) {
 	if (!context || data->NotificationSource != WLAN_NOTIFICATION_SOURCE_ACM) return;
 	ScanContext* ctx = reinterpret_cast<ScanContext*>(context);
 
@@ -88,14 +88,14 @@ void WifiScanner::WlanNotificationCallback(PWLAN_NOTIFICATION_DATA data, PVOID c
 	}
 }
 
-std::string WifiScanner::GetSSIDString(const DOT11_SSID& ssid) {
+std::string WindowsWifiScanner::GetSSIDString(const DOT11_SSID& ssid) {
 	if (ssid.uSSIDLength == 0)
 		return "";
 
 	return std::string(reinterpret_cast<const char*>(ssid.ucSSID), ssid.uSSIDLength);
 }
 
-WifiAccessPoint WifiScanner::GetChannelInfo(const WLAN_BSS_ENTRY& bss) {
+WifiAccessPoint WindowsWifiScanner::GetChannelInfo(const WLAN_BSS_ENTRY& bss) {
 	WifiAccessPoint ap;
 	ap.frequency = bss.ulChCenterFrequency;
 	ap.primaryChannel = FrequencyToChannel(ap.frequency);
@@ -137,7 +137,7 @@ WifiAccessPoint WifiScanner::GetChannelInfo(const WLAN_BSS_ENTRY& bss) {
 	return ap;
 }
 
-ULONG WifiScanner::FrequencyToChannel(ULONG frequency) {
+ULONG WindowsWifiScanner::FrequencyToChannel(ULONG frequency) {
 	ULONG freqMHz = frequency / 1000;
 
 	if (freqMHz >= 2412 && freqMHz <= 2484) {

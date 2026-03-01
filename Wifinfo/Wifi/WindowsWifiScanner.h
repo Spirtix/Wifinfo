@@ -9,10 +9,10 @@
 #include "WifiAccessPoint.h"
 
 
-class WifiScanner {
+class WindowsWifiScanner {
 public:
-	WifiScanner();
-	~WifiScanner();
+	WindowsWifiScanner();
+	~WindowsWifiScanner();
     std::vector<WifiAccessPoint> ScanNetworks();
 private:
     struct ScanContext {
