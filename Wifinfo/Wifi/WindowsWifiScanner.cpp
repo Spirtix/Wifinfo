@@ -3,7 +3,7 @@
 #include "WindowsWifiScanner.h"
 #include "IEParser.h"
 
-WindowsWifiScanner::WindowsWifiScanner() : clientHandle(NULL), negotiatedVersion(0) {
+WindowsWifiScanner::WindowsWifiScanner() {
 	DWORD result = WlanOpenHandle(2, NULL, &negotiatedVersion, &clientHandle);
 
 	if (result != ERROR_SUCCESS)
@@ -11,17 +11,8 @@ WindowsWifiScanner::WindowsWifiScanner() : clientHandle(NULL), negotiatedVersion
 
 	result = WlanEnumInterfaces(clientHandle, NULL, &interfaceList);
 
-	if (result != ERROR_SUCCESS) {
-		WlanCloseHandle(clientHandle, NULL);
+	if (result != ERROR_SUCCESS)
 		throw std::runtime_error("Failed to enumerate interfaces. Error code: " + std::to_string(result));
-	}
-}
-
-WindowsWifiScanner::~WindowsWifiScanner() {
-	if (interfaceList != NULL)
-		WlanFreeMemory(interfaceList);
-	if (clientHandle != NULL)
-		WlanCloseHandle(clientHandle, NULL);
 }
 
 std::vector<WifiAccessPoint> WindowsWifiScanner::ScanNetworks() {
@@ -46,40 +37,32 @@ std::vector<WifiAccessPoint> WindowsWifiScanner::ScanNetworks() {
 	WlanRegisterNotification(clientHandle, WLAN_NOTIFICATION_SOURCE_NONE, TRUE,NULL, NULL, NULL, NULL);
 
 	for (DWORD i = 0; i < interfaceList->dwNumberOfItems; ++i) {
-		PWLAN_BSS_LIST bssList = NULL;
+		WlanPointer<WLAN_BSS_LIST> bssList;
 
 		DWORD result = WlanGetNetworkBssList(clientHandle, &interfaceList->InterfaceInfo[i].InterfaceGuid,
 			NULL, dot11_BSS_type_any, FALSE, NULL, &bssList);
 		if (result != ERROR_SUCCESS)
 			continue;
 
-		try {
-			for (DWORD j = 0; j < bssList->dwNumberOfItems; ++j) {
-				WLAN_BSS_ENTRY& bss = bssList->wlanBssEntries[j];
+		for (DWORD j = 0; j < bssList->dwNumberOfItems; ++j) {
+			WLAN_BSS_ENTRY& bss = bssList->wlanBssEntries[j];
 
-				WifiAccessPoint ap;
-				auto channelInfo = IEParser::ParseChannelInfo(bss);
-				ap.primaryChannel = channelInfo.primaryChannel;
-				ap.centerChannel = channelInfo.centerChannel;
-				ap.widthMHz = channelInfo.widthMHz;
-				ap.frequency = bss.ulChCenterFrequency;
-				ap.ssid = IEParser::GetSSIDString(bss.dot11Ssid);
-				if (ap.ssid.empty())
-					ap.ssid = "<Hidden SSID>";
-				ap.signalQuality = (int)bss.uLinkQuality;
-				ap.signalStrength = bss.lRssi;
-				ap.band = (ap.frequency > 5000000) ? "5GHz" : "2.4GHz";
-				ap.phyType = IEParser::PhyTypeName(bss.dot11BssPhyType);
+			WifiAccessPoint ap;
+			auto channelInfo = IEParser::ParseChannelInfo(bss);
+			ap.primaryChannel = channelInfo.primaryChannel;
+			ap.centerChannel = channelInfo.centerChannel;
+			ap.widthMHz = channelInfo.widthMHz;
+			ap.frequency = bss.ulChCenterFrequency;
+			ap.ssid = IEParser::GetSSIDString(bss.dot11Ssid);
+			if (ap.ssid.empty())
+				ap.ssid = "<Hidden SSID>";
+			ap.signalQuality = (int)bss.uLinkQuality;
+			ap.signalStrength = bss.lRssi;
+			ap.band = (ap.frequency > 5000000) ? "5GHz" : "2.4GHz";
+			ap.phyType = IEParser::PhyTypeName(bss.dot11BssPhyType);
 
-				accessPoints.push_back(ap);
-			}
-		} catch (...) {
-			WlanFreeMemory(bssList);
-			throw;
+			accessPoints.push_back(ap);
 		}
-
-		if (bssList != NULL)
-			WlanFreeMemory(bssList);
 	}
 	return accessPoints;
 }
