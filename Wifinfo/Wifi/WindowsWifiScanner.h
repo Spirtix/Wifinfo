@@ -27,7 +27,4 @@ private:
     ScanContext ctx;
 
     static void WlanNotificationCallback(PWLAN_NOTIFICATION_DATA data, PVOID context);
-    std::string GetSSIDString(const DOT11_SSID& ssid);
-    ULONG FrequencyToChannel(ULONG frequency);
-    WifiAccessPoint GetChannelInfo(const WLAN_BSS_ENTRY& bss);
 };

@@ -1,6 +1,7 @@
 #include <stdexcept>
 
 #include "WindowsWifiScanner.h"
+#include "IEParser.h"
 
 WindowsWifiScanner::WindowsWifiScanner() : clientHandle(NULL), negotiatedVersion(0) {
 	DWORD result = WlanOpenHandle(2, NULL, &negotiatedVersion, &clientHandle);
@@ -56,8 +57,13 @@ std::vector<WifiAccessPoint> WindowsWifiScanner::ScanNetworks() {
 			for (DWORD j = 0; j < bssList->dwNumberOfItems; ++j) {
 				WLAN_BSS_ENTRY& bss = bssList->wlanBssEntries[j];
 
-				WifiAccessPoint ap = GetChannelInfo(bss);
-				ap.ssid = GetSSIDString(bss.dot11Ssid);
+				WifiAccessPoint ap;
+				auto channelInfo = IEParser::ParseChannelInfo(bss);
+				ap.primaryChannel = channelInfo.primaryChannel;
+				ap.centerChannel = channelInfo.centerChannel;
+				ap.widthMHz = channelInfo.widthMHz;
+				ap.frequency = bss.ulChCenterFrequency;
+				ap.ssid = IEParser::GetSSIDString(bss.dot11Ssid);
 				if (ap.ssid.empty())
 					ap.ssid = "<Hidden SSID>";
 				ap.signalQuality = (int)bss.uLinkQuality;
@@ -86,68 +92,4 @@ void WindowsWifiScanner::WlanNotificationCallback(PWLAN_NOTIFICATION_DATA data, 
 		--ctx->pendingScans;
 		ctx->cv.notify_all();
 	}
-}
-
-std::string WindowsWifiScanner::GetSSIDString(const DOT11_SSID& ssid) {
-	if (ssid.uSSIDLength == 0)
-		return "";
-
-	return std::string(reinterpret_cast<const char*>(ssid.ucSSID), ssid.uSSIDLength);
-}
-
-WifiAccessPoint WindowsWifiScanner::GetChannelInfo(const WLAN_BSS_ENTRY& bss) {
-	WifiAccessPoint ap;
-	ap.frequency = bss.ulChCenterFrequency;
-	ap.primaryChannel = FrequencyToChannel(ap.frequency);
-	ap.centerChannel = ap.primaryChannel;
-	ap.widthMHz = 20;
-
-	unsigned char* pIeData = (unsigned char*)&bss + bss.ulIeOffset;
-	ULONG offset = 0;
-
-	while (offset + 2 < bss.ulIeSize) {
-		unsigned char id = pIeData[offset];
-		unsigned char length = pIeData[offset + 1];
-		unsigned char* data = &pIeData[offset + 2];
-
-		if (id == 61 && length >= 2) {
-			ap.primaryChannel = data[0];
-			unsigned char secondaryOffset = data[1] & 0x03;
-
-			if (secondaryOffset == 1) { // SCA: Secondary Channel Above
-				ap.widthMHz = 40;
-				ap.centerChannel = ap.primaryChannel + 2;
-			} else if (secondaryOffset == 3) { // SCB: Secondary Channel Below
-				ap.widthMHz = 40;
-				ap.centerChannel = ap.primaryChannel - 2;
-			}
-		} else if (id == 192 && length >= 3) {
-			unsigned char widthMode = data[0]; // 0: 20/40, 1: 80, 2: 160
-			if (widthMode == 1) {
-				ap.widthMHz = 80;
-				ap.centerChannel = data[1];
-			} else if (widthMode == 2) {
-				ap.widthMHz = 160;
-				ap.centerChannel = data[1];
-			}
-		}
-
-		offset += (2 + length);
-	}
-	return ap;
-}
-
-ULONG WindowsWifiScanner::FrequencyToChannel(ULONG frequency) {
-	ULONG freqMHz = frequency / 1000;
-
-	if (freqMHz >= 2412 && freqMHz <= 2484) {
-		if (freqMHz == 2484) return 14;
-		return (freqMHz - 2407) / 5;
-	}
-
-	if (freqMHz >= 5170 && freqMHz <= 5825) {
-		return (freqMHz - 5000) / 5;
-	}
-
-	return 0;
 }
