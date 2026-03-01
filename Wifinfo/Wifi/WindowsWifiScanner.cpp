@@ -69,6 +69,7 @@ std::vector<WifiAccessPoint> WindowsWifiScanner::ScanNetworks() {
 				ap.signalQuality = (int)bss.uLinkQuality;
 				ap.signalStrength = bss.lRssi;
 				ap.band = (ap.frequency > 5000000) ? "5GHz" : "2.4GHz";
+				ap.phyType = IEParser::PhyTypeName(bss.dot11BssPhyType);
 
 				accessPoints.push_back(ap);
 			}

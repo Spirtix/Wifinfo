@@ -63,3 +63,50 @@ ULONG IEParser::FrequencyToChannel(ULONG frequency) {
 
 	return 0;
 }
+
+std::string IEParser::PhyTypeName(DOT11_PHY_TYPE pt) {
+	switch (pt) {
+		case dot11_phy_type_fhss:       return "FHSS";
+		case dot11_phy_type_dsss:       return "DSSS";
+		case dot11_phy_type_irbaseband: return "IR";
+		case dot11_phy_type_ofdm:       return "802.11a";
+		case dot11_phy_type_hrdsss:     return "802.11b";
+		case dot11_phy_type_erp:        return "802.11g";
+		case dot11_phy_type_ht:         return "802.11n";
+		case dot11_phy_type_vht:        return "802.11ac";
+		case dot11_phy_type_dmg:		return "802.11ad";
+		case dot11_phy_type_he:         return "802.11ax";
+		case dot11_phy_type_eht:		return "802.11be";
+		default:                        return "Unknown";
+	}
+}
+
+std::string IEParser::SecurityName(DOT11_AUTH_ALGORITHM auth, DOT11_CIPHER_ALGORITHM cipher) {
+	std::string s;
+	switch (auth) {
+		case DOT11_AUTH_ALGO_80211_OPEN:       s = "Open";                break;
+		case DOT11_AUTH_ALGO_80211_SHARED_KEY: s = "WEP";                 break;
+		case DOT11_AUTH_ALGO_WPA:              s = "WPA-Enterprise";      break;
+		case DOT11_AUTH_ALGO_WPA_PSK:          s = "WPA-PSK";             break;
+		case DOT11_AUTH_ALGO_WPA_NONE:         s = "WPA-None";            break;
+		case DOT11_AUTH_ALGO_RSNA:             s = "WPA2-Enterprise";     break;
+		case DOT11_AUTH_ALGO_RSNA_PSK:         s = "WPA2-PSK";            break;
+		case DOT11_AUTH_ALGO_WPA3_ENT_192:     s = "WPA3-Enterprise-192"; break;
+		case DOT11_AUTH_ALGO_WPA3_SAE:         s = "WPA3-Personal";       break;
+		case DOT11_AUTH_ALGO_OWE:              s = "OWE";                 break;
+		case DOT11_AUTH_ALGO_WPA3_ENT:         s = "WPA3-Enterprise";     break;
+		default:                               s = "Unknown";             break;
+	}
+	switch (cipher) {
+		case DOT11_CIPHER_ALGO_CCMP:     s += "/AES";      break;
+		case DOT11_CIPHER_ALGO_CCMP_256: s += "/AES-256";  break;
+		case DOT11_CIPHER_ALGO_GCMP:     s += "/GCMP-128"; break;
+		case DOT11_CIPHER_ALGO_GCMP_256: s += "/GCMP-256"; break;
+		case DOT11_CIPHER_ALGO_TKIP:     s += "/TKIP";     break;
+		case DOT11_CIPHER_ALGO_WEP:      s += "/WEP";      break;
+		case DOT11_CIPHER_ALGO_WEP40:    s += "/WEP-40";   break;
+		case DOT11_CIPHER_ALGO_WEP104:   s += "/WEP-104";  break;
+		default:                                           break;
+	}
+	return s;
+}
