@@ -49,6 +49,7 @@ std::vector<WifiAccessPoint> WindowsWifiScanner::ScanNetworks() {
 
 			WifiAccessPoint ap;
 			auto channelInfo = IEParser::ParseChannelInfo(bss);
+			ap.bssid = IEParser::MacToString(bss.dot11Bssid);
 			ap.primaryChannel = channelInfo.primaryChannel;
 			ap.centerChannel = channelInfo.centerChannel;
 			ap.widthMHz = channelInfo.widthMHz;

@@ -17,4 +17,5 @@ public:
     static ULONG FrequencyToChannel(ULONG frequency);
     static std::string PhyTypeName(DOT11_PHY_TYPE pt);
     static std::string SecurityName(DOT11_AUTH_ALGORITHM auth, DOT11_CIPHER_ALGORITHM cipher);
+    static std::string MacToString(const DOT11_MAC_ADDRESS& mac);
 };

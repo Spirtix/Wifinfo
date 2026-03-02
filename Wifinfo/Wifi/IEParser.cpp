@@ -1,4 +1,5 @@
 #include "IEParser.h"
+#include <format>
 
 ChannelInfo IEParser::ParseChannelInfo(const WLAN_BSS_ENTRY& bss) {
 	ChannelInfo channelInfo;
@@ -109,4 +110,9 @@ std::string IEParser::SecurityName(DOT11_AUTH_ALGORITHM auth, DOT11_CIPHER_ALGOR
 		default:                                           break;
 	}
 	return s;
+}
+
+std::string IEParser::MacToString(const DOT11_MAC_ADDRESS& mac) {
+	return std::format("{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}",
+		mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 }
