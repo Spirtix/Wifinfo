@@ -3,6 +3,7 @@
 #include <implot.h>
 #include <stdexcept>
 #include <string>
+#include <format>
 #include <comdef.h>
 
 #include "Renderer.h"
@@ -85,9 +86,9 @@ void Renderer::ReleaseRenderTarget() {
     renderTargetView.Reset();
 }
 
-inline void Renderer::ThrowIfFailed(HRESULT hr, const std::string& message) {
+void Renderer::ThrowIfFailed(HRESULT hr, const std::string& message) {
     if (FAILED(hr)) {
         _com_error err(hr);
-        throw std::runtime_error(message + " (" + std::to_string(hr) + ") " + err.ErrorMessage());
+        throw std::runtime_error(std::format("{} ({}) {}", message, hr, err.ErrorMessage()));
     }
 }

@@ -12,10 +12,10 @@ struct ChannelInfo {
 class IEParser {
 public:
     IEParser() = delete;
-    static ChannelInfo ParseChannelInfo(const WLAN_BSS_ENTRY& bss);
-    static std::string GetSSIDString(const DOT11_SSID& ssid);
-    static ULONG FrequencyToChannel(ULONG frequency);
-    static std::string PhyTypeName(DOT11_PHY_TYPE pt);
-    static std::string SecurityName(DOT11_AUTH_ALGORITHM auth, DOT11_CIPHER_ALGORITHM cipher);
-    static std::string MacToString(const DOT11_MAC_ADDRESS& mac);
+    [[nodiscard]] static ChannelInfo ParseChannelInfo(const WLAN_BSS_ENTRY& bss);
+    [[nodiscard]] static std::string GetSSIDString(const DOT11_SSID& ssid);
+    [[nodiscard]] static ULONG FrequencyToChannel(ULONG frequency) noexcept;
+    [[nodiscard]] static std::string PhyTypeName(DOT11_PHY_TYPE pt);
+    [[nodiscard]] static std::string SecurityName(DOT11_AUTH_ALGORITHM auth, DOT11_CIPHER_ALGORITHM cipher);
+    [[nodiscard]] static std::string MacToString(const DOT11_MAC_ADDRESS& mac);
 };

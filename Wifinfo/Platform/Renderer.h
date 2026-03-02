@@ -19,5 +19,5 @@ private:
 
 	void CreateRenderTarget();
 	void ReleaseRenderTarget();
-	inline void ThrowIfFailed(HRESULT hr, const std::string& message);
+	static void ThrowIfFailed(HRESULT hr, const std::string& message);
 };

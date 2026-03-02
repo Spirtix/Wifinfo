@@ -32,7 +32,7 @@ bool Window::ShouldClose() {
     return false;
 }
 
-HWND Window::GetNativeHandle() {
+HWND Window::GetNativeHandle() const noexcept {
     return hwnd;
 }
 

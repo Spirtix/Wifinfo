@@ -13,7 +13,7 @@
 class WindowsWifiScanner {
 public:
 	WindowsWifiScanner();
-    std::vector<WifiAccessPoint> ScanNetworks();
+    [[nodiscard]] std::vector<WifiAccessPoint> ScanNetworks();
 private:
     struct ScanContext {
         std::atomic<int> pendingScans = 0 ;

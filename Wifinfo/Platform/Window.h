@@ -6,8 +6,8 @@ class Window {
 public:
 	Window();
 	~Window();
-	bool ShouldClose();
-	HWND GetNativeHandle();
+	[[nodiscard]] bool ShouldClose();
+	[[nodiscard]] HWND GetNativeHandle() const noexcept;
 	void SetResizeCallback(std::function<void(int, int)> callback);
 private:
 	HWND hwnd;

@@ -51,7 +51,7 @@ std::string IEParser::GetSSIDString(const DOT11_SSID& ssid) {
 	return std::string(reinterpret_cast<const char*>(ssid.ucSSID), ssid.uSSIDLength);
 }
 
-ULONG IEParser::FrequencyToChannel(ULONG frequency) {
+ULONG IEParser::FrequencyToChannel(ULONG frequency) noexcept {
 	ULONG freqMHz = frequency / 1000;
 
 	if (freqMHz >= 2412 && freqMHz <= 2484) {

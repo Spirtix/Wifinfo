@@ -23,7 +23,6 @@ void Application::Run() {
 
 	appContext.PushWindow(std::make_unique<TableWindow>(appContext));
 	appContext.PushWindow(std::make_unique<ChannelPlotWindow>(appContext));
-
 	while (!window.ShouldClose()) {
 		if (auto scanResult = scanner.TakeResults())
 			appContext.wifiAPs = std::move(*scanResult);

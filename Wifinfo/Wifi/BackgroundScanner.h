@@ -10,7 +10,7 @@ class BackgroundScanner {
 		BackgroundScanner(std::unique_ptr<WindowsWifiScanner> scanner) : scanner(std::move(scanner)) { }
 		void Start();
 		void Stop();
-		std::optional<std::vector<WifiAccessPoint>> TakeResults();
+		[[nodiscard]] std::optional<std::vector<WifiAccessPoint>> TakeResults();
 		void SetScanInterval(std::chrono::seconds seconds);
 	private:
 		std::unique_ptr<WindowsWifiScanner> scanner;
