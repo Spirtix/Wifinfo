@@ -1,5 +1,6 @@
 #include <imgui.h>
 #include <implot.h>
+#include <implot_internal.h>
 
 #include "ChannelPlotWindow.h"
 #include "../Application.h"
@@ -40,6 +41,11 @@ void ChannelPlotWindow::Update() {
 				ImPlot::PushStyleVar(ImPlotStyleVar_LineWeight, 2);
 				ImPlot::PlotLine(ap.ssid.c_str(), xData.data(), yData.data(), numPoints);
 				ImPlot::PopStyleColor();
+
+				if (ImPlot::BeginItem(ap.ssid.c_str())) {
+					ImPlot::PlotText(ap.ssid.c_str(), ap.centerChannel, ap.signalStrength, ImVec2(0, -10));
+					ImPlot::EndItem();
+				}
 			}
 			ImPlot::EndPlot();
 		}
