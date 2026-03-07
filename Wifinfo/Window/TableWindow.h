@@ -1,10 +1,10 @@
 #pragma once
-#include "ImGuiWindow.h"
+#include "View.h"
 #include "../AppContext.h"
 
-class TableWindow : public ImGuiWindow {
+class TableWindow : public View {
 	public:
-		TableWindow(AppContext& appContext) : ImGuiWindow(), appContext(appContext) { }
+		TableWindow(AppContext& appContext) : View(), appContext(appContext) { }
 		void Update() override;
 	private:
 		AppContext& appContext;

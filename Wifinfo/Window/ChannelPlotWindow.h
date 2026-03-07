@@ -1,12 +1,12 @@
 #pragma once
 #include <vector>
 
-#include "ImGuiWindow.h"
+#include "View.h"
 #include "../AppContext.h"
 
-class ChannelPlotWindow : public ImGuiWindow {
+class ChannelPlotWindow : public View {
 	public:
-		ChannelPlotWindow(AppContext& appContext) : ImGuiWindow(), appContext(appContext), xData(numPoints), yData(numPoints) {}
+		ChannelPlotWindow(AppContext& appContext) : View(), appContext(appContext), xData(numPoints), yData(numPoints) {}
 		void Update() override;
 	private:
 		std::vector<double> xData, yData;
