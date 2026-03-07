@@ -35,6 +35,11 @@ void ChannelPlotWindow::Update() {
 				ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.5f);
 				ImPlot::PlotShaded(ap.ssid.c_str(), xData.data(), yData.data(), numPoints, -100.0);
 				ImPlot::PopStyleVar();
+
+				ImPlot::PushStyleColor(ImPlotCol_Line, ImPlot::GetLastItemColor());
+				ImPlot::PushStyleVar(ImPlotStyleVar_LineWeight, 2);
+				ImPlot::PlotLine(ap.ssid.c_str(), xData.data(), yData.data(), numPoints);
+				ImPlot::PopStyleColor();
 			}
 			ImPlot::EndPlot();
 		}
