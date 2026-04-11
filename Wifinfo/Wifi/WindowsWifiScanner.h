@@ -1,22 +1,21 @@
 #pragma once
-#include <vector>
-#include <string>
 #include <atomic>
 #include <mutex>
 #include <Windows.h>
 #include <wlanapi.h>
 #include <iostream>
 
+#include "WifiScanner.h"
 #include "WifiAccessPoint.h"
 
 
-class WindowsWifiScanner {
+class WindowsWifiScanner : public WifiScanner {
 public:
 	WindowsWifiScanner();
-    [[nodiscard]] std::vector<WifiAccessPoint> ScanNetworks();
+    [[nodiscard]] std::vector<WifiAccessPoint> ScanNetworks() override;
 private:
     struct ScanContext {
-        std::atomic<int> pendingScans = 0 ;
+        std::atomic<int> pendingScans = 0;
         std::mutex mtx;
         std::condition_variable cv;
     };
