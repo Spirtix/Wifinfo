@@ -2,10 +2,10 @@
 #include <d3d11.h>
 #include <wrl/client.h>
 
-class Renderer {
+class DirectXRenderer {
 public:
-	Renderer(HWND windowHandle);
-	~Renderer();
+	DirectXRenderer(HWND windowHandle);
+	~DirectXRenderer();
 	void BeginFrame();
 	void EndFrame();
 	void OnResize(int width, int height);

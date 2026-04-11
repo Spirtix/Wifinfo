@@ -3,7 +3,7 @@
 
 #include "Application.h"
 #include "Platform/Window.h"
-#include "Platform/Renderer.h"
+#include "Platform/DirectXRenderer.h"
 #include "Wifi/BackgroundScanner.h"
 #include "Wifi/WindowsWifiScanner.h"
 #include "Window/TableWindow.h"
@@ -14,7 +14,7 @@ void Application::Run() {
 	scanner.Start();
 	
 	Window window;
-	Renderer renderer(window.GetNativeHandle());
+	DirectXRenderer renderer(window.GetNativeHandle());
 	window.SetResizeCallback([&renderer](int width, int height) {
 		renderer.OnResize(width, height);
 	});

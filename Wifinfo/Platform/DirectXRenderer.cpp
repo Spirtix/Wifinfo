@@ -6,11 +6,11 @@
 #include <format>
 #include <comdef.h>
 
-#include "Renderer.h"
+#include "DirectXRenderer.h"
 
 using Microsoft::WRL::ComPtr;
 
-Renderer::Renderer(HWND windowHandle) {
+DirectXRenderer::DirectXRenderer(HWND windowHandle) {
 	DXGI_SWAP_CHAIN_DESC sd = {};
     sd.BufferCount = 2;
     sd.BufferDesc.Width = 0;
@@ -43,7 +43,7 @@ Renderer::Renderer(HWND windowHandle) {
     ImGui_ImplDX11_Init(device.Get(), deviceContext.Get());
 }
 
-Renderer::~Renderer() {
+DirectXRenderer::~DirectXRenderer() {
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImPlot::DestroyContext();
@@ -51,21 +51,21 @@ Renderer::~Renderer() {
     ReleaseRenderTarget();
 }
 
-void Renderer::BeginFrame() {
+void DirectXRenderer::BeginFrame() {
     ImGui_ImplDX11_NewFrame(); // no need to call RSSetViewport because ImGUI does it
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
 }
 
-void Renderer::EndFrame() {
+void DirectXRenderer::EndFrame() {
     ImGui::Render();
     deviceContext->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), nullptr);
-    deviceContext->ClearRenderTargetView(renderTargetView.Get(), Renderer::clearColor);
+    deviceContext->ClearRenderTargetView(renderTargetView.Get(), DirectXRenderer::clearColor);
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
     swapChain->Present(1, 0);
 }
 
-void Renderer::OnResize(int width, int height) {
+void DirectXRenderer::OnResize(int width, int height) {
     if (!device)
         return;
     
@@ -74,7 +74,7 @@ void Renderer::OnResize(int width, int height) {
     CreateRenderTarget();
 }
 
-void Renderer::CreateRenderTarget() {
+void DirectXRenderer::CreateRenderTarget() {
     ComPtr<ID3D11Texture2D> backBuffer;
     HRESULT hr = swapChain->GetBuffer(0, IID_PPV_ARGS(backBuffer.GetAddressOf()));
     ThrowIfFailed(hr, "DirectX failed to get BackBuffer: ");
@@ -82,11 +82,11 @@ void Renderer::CreateRenderTarget() {
     ThrowIfFailed(hr, "DirectX failed to create RTV: ");
 }
 
-void Renderer::ReleaseRenderTarget() {
+void DirectXRenderer::ReleaseRenderTarget() {
     renderTargetView.Reset();
 }
 
-void Renderer::ThrowIfFailed(HRESULT hr, const std::string& message) {
+void DirectXRenderer::ThrowIfFailed(HRESULT hr, const std::string& message) {
     if (FAILED(hr)) {
         _com_error err(hr);
         throw std::runtime_error(std::format("{} ({}) {}", message, hr, err.ErrorMessage()));
