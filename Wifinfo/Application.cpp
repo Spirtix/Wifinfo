@@ -14,9 +14,9 @@ void Application::Run() {
 	scanner.Start();
 	
 	Window window;
-	DirectXRenderer renderer(window.GetNativeHandle());
+	std::unique_ptr<Renderer> renderer(std::make_unique<DirectXRenderer>(window.GetNativeHandle()));
 	window.SetResizeCallback([&renderer](int width, int height) {
-		renderer.OnResize(width, height);
+		renderer->OnResize(width, height);
 	});
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -26,13 +26,13 @@ void Application::Run() {
 	while (!window.ShouldClose()) {
 		if (auto scanResult = scanner.TakeResults())
 			appContext.wifiAPs = std::move(*scanResult);
-		renderer.BeginFrame();
+		renderer->BeginFrame();
 		ImGuiViewport* vp = ImGui::GetMainViewport();
 		ImGui::DockSpaceOverViewport(vp->ID, vp);
 		for (auto& wnd : appContext.windows) {
 			wnd->Update();
 		}
-		renderer.EndFrame();
+		renderer->EndFrame();
 	}
 
 	scanner.Stop();

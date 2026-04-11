@@ -2,13 +2,15 @@
 #include <d3d11.h>
 #include <wrl/client.h>
 
-class DirectXRenderer {
+#include "Renderer.h"
+
+class DirectXRenderer : public Renderer {
 public:
 	DirectXRenderer(HWND windowHandle);
-	~DirectXRenderer();
-	void BeginFrame();
-	void EndFrame();
-	void OnResize(int width, int height);
+	~DirectXRenderer() override;
+	void BeginFrame() override;
+	void EndFrame() override;
+	void OnResize(int width, int height) override;
 
 private:
 	Microsoft::WRL::ComPtr<ID3D11Device> device;
