@@ -12,4 +12,17 @@ include_directories(${CMAKE_SOURCE_DIR}/vendor/implot)
 add_subdirectory ("Wifinfo")
 add_subdirectory("vendor")
 
+if (WIN32)
 target_link_libraries(Wifinfo PRIVATE wlanapi d3d11 imgui)
+elseif (APPLE)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_OBJCXX_STANDARD 20)
+
+find_library(COCOA_FRAMEWORK Cocoa)
+find_library(METAL_FRAMEWORK Metal)
+find_library(METALKIT_FRAMEWORK MetalKit)
+find_library(QUARTZCORE_FRAMEWORK QuartzCore)
+find_library(GAMECONTROLLER_FRAMEWORK GameController)
+
+target_link_libraries(Wifinfo PRIVATE ${COCOA_FRAMEWORK} ${METAL_FRAMEWORK} ${METALKIT_FRAMEWORK} ${QUARTZCORE_FRAMEWORK} ${GAMECONTROLLER_FRAMEWORK} imgui)
+endif()
