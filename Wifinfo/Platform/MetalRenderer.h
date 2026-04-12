@@ -5,11 +5,11 @@
 class MetalRenderer : public Renderer {
 public:
     MetalRenderer(void* nsView);
-    ~MetalRenderer();
+    ~MetalRenderer() override;
 
-    void BeginFrame();
-    void EndFrame();
-    void OnResize(int width, int height);
+    void BeginFrame() override;
+    void EndFrame() override;
+    void OnResize(int width, int height) override;
 
 private:
     void* view = nullptr;
