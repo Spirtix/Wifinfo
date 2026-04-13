@@ -2,13 +2,15 @@
 #include <Windows.h>
 #include <functional>
 
-class Win32Window {
+#include "Window.h"
+
+class Win32Window : public Window {
 public:
 	Win32Window();
-	~Win32Window();
-	[[nodiscard]] bool ShouldClose();
-	[[nodiscard]] HWND GetNativeHandle() const noexcept;
-	void SetResizeCallback(std::function<void(int, int)> callback);
+	~Win32Window() override;
+	[[nodiscard]] bool ShouldClose() override;
+	[[nodiscard]] NativeHandle GetNativeHandle() const noexcept override;
+	void SetResizeCallback(std::function<void(int, int)> callback) override;
 private:
 	HWND hwnd;
 	WNDCLASSW wc = { };

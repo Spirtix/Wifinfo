@@ -13,9 +13,9 @@ void Application::Run() {
 	BackgroundScanner scanner(std::make_unique<WindowsWifiScanner>());
 	scanner.Start();
 	
-	Win32Window window;
-	std::unique_ptr<Renderer> renderer(std::make_unique<DirectXRenderer>(window.GetNativeHandle()));
-	window.SetResizeCallback([&renderer](int width, int height) {
+	std::unique_ptr<Window> window(std::make_unique<Win32Window>());
+	std::unique_ptr<Renderer> renderer(std::make_unique<DirectXRenderer>(window->GetNativeHandle()));
+	window->SetResizeCallback([&renderer](int width, int height) {
 		renderer->OnResize(width, height);
 	});
 	ImGuiIO& io = ImGui::GetIO();
@@ -23,7 +23,7 @@ void Application::Run() {
 
 	appContext.PushWindow(std::make_unique<TableWindow>(appContext));
 	appContext.PushWindow(std::make_unique<ChannelPlotWindow>(appContext));
-	while (!window.ShouldClose()) {
+	while (!window->ShouldClose()) {
 		if (auto scanResult = scanner.TakeResults())
 			appContext.wifiAPs = std::move(*scanResult);
 		renderer->BeginFrame();
