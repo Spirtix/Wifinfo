@@ -1,10 +1,10 @@
 #include <imgui.h>
 #include<iostream>
-#include "Window.h"
+#include "Win32Window.h"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-Window::Window() {
+Win32Window::Win32Window() {
 	wc.lpfnWndProc = WndProc;
 	wc.hInstance = GetModuleHandle(0);
 	wc.lpszClassName = L"Wifinfo";
@@ -15,12 +15,12 @@ Window::Window() {
 	ShowWindow(hwnd, SW_SHOWDEFAULT);
 }
 
-Window::~Window() {
+Win32Window::~Win32Window() {
     DestroyWindow(hwnd);
     UnregisterClassW(wc.lpszClassName, wc.hInstance);
 }
 
-bool Window::ShouldClose() {
+bool Win32Window::ShouldClose() {
     MSG msg;
     while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
         TranslateMessage(&msg);
@@ -32,17 +32,17 @@ bool Window::ShouldClose() {
     return false;
 }
 
-HWND Window::GetNativeHandle() const noexcept {
+HWND Win32Window::GetNativeHandle() const noexcept {
     return hwnd;
 }
 
-void Window::SetResizeCallback(std::function<void(int, int)> callback) {
+void Win32Window::SetResizeCallback(std::function<void(int, int)> callback) {
     resizeCallback = callback;
 }
 
-LRESULT WINAPI Window::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT WINAPI Win32Window::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    Window* window = (Window*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+    Win32Window* window = (Win32Window*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
     if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
         return true;
 

@@ -2,7 +2,7 @@
 #include <imgui.h>
 
 #include "Application.h"
-#include "Platform/Window.h"
+#include "Platform/Win32Window.h"
 #include "Platform/DirectXRenderer.h"
 #include "Wifi/BackgroundScanner.h"
 #include "Wifi/WindowsWifiScanner.h"
@@ -13,7 +13,7 @@ void Application::Run() {
 	BackgroundScanner scanner(std::make_unique<WindowsWifiScanner>());
 	scanner.Start();
 	
-	Window window;
+	Win32Window window;
 	std::unique_ptr<Renderer> renderer(std::make_unique<DirectXRenderer>(window.GetNativeHandle()));
 	window.SetResizeCallback([&renderer](int width, int height) {
 		renderer->OnResize(width, height);

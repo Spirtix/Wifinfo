@@ -2,10 +2,10 @@
 #include <Windows.h>
 #include <functional>
 
-class Window {
+class Win32Window {
 public:
-	Window();
-	~Window();
+	Win32Window();
+	~Win32Window();
 	[[nodiscard]] bool ShouldClose();
 	[[nodiscard]] HWND GetNativeHandle() const noexcept;
 	void SetResizeCallback(std::function<void(int, int)> callback);
