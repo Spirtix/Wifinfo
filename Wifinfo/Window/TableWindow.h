@@ -7,5 +7,7 @@ class TableWindow : public View {
 		TableWindow(AppContext& appContext) : View(), appContext(appContext) { }
 		void Update() override;
 	private:
+		void Sort(ImGuiTableSortSpecs* sortSpecs);
 		AppContext& appContext;
+		std::vector<size_t> sortedIndices;
 };
