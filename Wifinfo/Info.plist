@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleIdentifier</key>
+    <string>com.spirtix.wifinfo</string>
+    <key>CFBundleName</key>
+    <string>Wifinfo</string>
+    <key>CFBundleExecutable</key>
+    <string>Wifinfo</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>NSLocationUsageDescription</key>
+    <string>Wi-Fi network names require Location access.</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Wi-Fi network names require Location access on macOS.</string>
+</dict>
+</plist>

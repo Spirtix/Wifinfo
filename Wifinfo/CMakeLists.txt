@@ -1,4 +1,4 @@
-﻿set(CORE_SOURCES
+set(CORE_SOURCES
     main.cpp
     Application.h
     Application.cpp
@@ -39,7 +39,11 @@ elseif (APPLE)
     set(PLATFORM_SOURCES
         Platform/MacWindow.mm
         Platform/MetalRenderer.mm
+        Platform/MacLocationPermission.mm
+        Wifi/MacWifiScanner.mm
         Platform/MetalRenderer.h
+        Wifi/MacWifiScanner.h
+        Platform/MacLocationPermission.h
     )
 elseif (UNIX)
     set(PLATFORM_SOURCES
@@ -55,6 +59,10 @@ set(ALL_SOURCES
 )
 
 add_executable(Wifinfo ${ALL_SOURCES})
+
+if (APPLE)
+    source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${ALL_SOURCES})
+endif()
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET Wifinfo PROPERTY CXX_STANDARD 20)
