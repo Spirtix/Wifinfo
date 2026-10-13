@@ -12,9 +12,8 @@ public:
     void OnResize(int width, int height) override;
 
 private:
-    void* view = nullptr;
-    void* device = nullptr;
-    void* commandQueue = nullptr;
+    struct Impl;
+    std::unique_ptr<Impl> impl;
 
     float clearColor[4] = {0.1f, 0.1f, 0.1f, 1.0f};
 };

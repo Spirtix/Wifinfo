@@ -3,14 +3,19 @@
 
 #include "MacWindow.h"
 
-MacWindow::MacWindow() {
+struct MacWindow::Impl {
+    NSWindow* window = nil;
+    MTKView* view = nil;
+};
+
+MacWindow::MacWindow() : impl(std::make_unique<Impl>()) {
     @autoreleasepool {
         [NSApplication sharedApplication];
         [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
         [NSApp finishLaunching];
 
         NSRect frame = NSMakeRect(0, 0, 1280, 720);
-        NSWindow* win = [[NSWindow alloc]
+        impl->window = [[NSWindow alloc]
             initWithContentRect:frame
                       styleMask:(NSWindowStyleMaskTitled |
                                  NSWindowStyleMaskClosable |
@@ -18,23 +23,22 @@ MacWindow::MacWindow() {
                                  NSWindowStyleMaskResizable)
                         backing:NSBackingStoreBuffered
                           defer:NO];
-        [win setTitle:@"Wifinfo"];
-        [win setReleasedWhenClosed:NO];
+        [impl->window setTitle:@"Wifinfo"];
+        [impl->window setReleasedWhenClosed:NO];
 
         id<MTLDevice> device = MTLCreateSystemDefaultDevice();
-        MTKView* v = [[MTKView alloc] initWithFrame:frame device:device];
-        [win setContentView:v];
-        [v release];
+        impl->view = [[MTKView alloc] initWithFrame:frame device:device];
+        [device release];
+        [impl->window setContentView:impl->view];
+        [impl->view release];
 
-        [win center];
-        [win makeKeyAndOrderFront:nil];
+        [impl->window center];
+        [impl->window makeKeyAndOrderFront:nil];
         [NSApp activateIgnoringOtherApps:YES];
 
-        nsWindow = win;
-        view = v;
         shouldClose = false;
 
-        CGSize size = v.drawableSize;
+        CGSize size = impl->view.drawableSize;
         lastWidth = (int)size.width;
         lastHeight = (int)size.height;
     }
@@ -42,11 +46,8 @@ MacWindow::MacWindow() {
 
 MacWindow::~MacWindow() {
     @autoreleasepool {
-        NSWindow* win = (NSWindow*)nsWindow;
-        [win close];
-        [win release];
-        nsWindow = nullptr;
-        view = nullptr;
+        [impl->window close];
+        [impl->window release];
     }
 }
 
@@ -60,11 +61,10 @@ bool MacWindow::ShouldClose() {
             [NSApp sendEvent:event];
         }
 
-        if (![(NSWindow*)nsWindow isVisible])
+        if (![impl->window isVisible])
             shouldClose = true;
 
-        MTKView* v = (MTKView*)view;
-        CGSize size = v.drawableSize;
+        CGSize size = impl->view.drawableSize;
         int w = (int)size.width;
         int h = (int)size.height;
         if (w != lastWidth || h != lastHeight) {
@@ -77,7 +77,7 @@ bool MacWindow::ShouldClose() {
 }
 
 NativeHandle MacWindow::GetNativeHandle() const noexcept {
-    return (NativeHandle)view;
+    return (NativeHandle)impl->view;
 }
 
 void MacWindow::SetResizeCallback(std::function<void(int, int)> callback) {

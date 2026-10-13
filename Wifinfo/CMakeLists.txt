@@ -42,6 +42,7 @@ elseif (APPLE)
         Platform/MetalRenderer.mm
         Platform/MacLocationPermission.mm
         Wifi/MacWifiScanner.mm
+        Platform/MacWindow.h
         Platform/MetalRenderer.h
         Wifi/MacWifiScanner.h
         Platform/MacLocationPermission.h

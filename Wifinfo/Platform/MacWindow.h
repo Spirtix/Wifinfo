@@ -13,8 +13,9 @@ public:
     void SetResizeCallback(std::function<void(int, int)> callback) override;
 
 private:
-    void* nsWindow = nullptr;
-    void* view = nullptr;
+    struct Impl;
+    std::unique_ptr<Impl> impl;
+
     bool shouldClose = false;
     int lastWidth = 0;
     int lastHeight = 0;
